@@ -58,7 +58,7 @@ This application was engineered according to the Website Developer Technical Ass
 | **Frontend** | Next.js 14, React 18, TypeScript | Server & Client Components, Responsive App Router |
 | **Styling** | Tailwind CSS, Lucide React Icons | Modern, clean, responsive UI system |
 | **Backend** | Python 3.11, FastAPI, Pydantic v2 | High-performance RESTful API & validation schemas |
-| **Database** | Direct Native PostgreSQL / psycopg2 (Zero SQLAlchemy) | Relational database with B-Tree indexes & SQLite fallback |
+| **Database** | Direct Native PostgreSQL / psycopg2  | Relational database with B-Tree indexes & SQLite fallback |
 | **Security** | Python-Jose (JWT), Passlib / Bcrypt | Secure token-based authentication & password hashing |
 | **Containerization**| Docker & Docker Compose | Multi-container orchestration (Postgres, Backend, Frontend) |
 
