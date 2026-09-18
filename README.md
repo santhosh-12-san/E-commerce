@@ -58,7 +58,7 @@ This application was engineered according to the Website Developer Technical Ass
 | **Frontend** | Next.js 14, React 18, TypeScript | Server & Client Components, Responsive App Router |
 | **Styling** | Tailwind CSS, Lucide React Icons | Modern, clean, responsive UI system |
 | **Backend** | Python 3.11, FastAPI, Pydantic v2 | High-performance RESTful API & validation schemas |
-| **Database** | PostgreSQL / SQLAlchemy 2.0 ORM | Relational database with B-Tree indexes & SQLite fallback |
+| **Database** | Direct Native PostgreSQL / psycopg2 (Zero SQLAlchemy) | Relational database with B-Tree indexes & SQLite fallback |
 | **Security** | Python-Jose (JWT), Passlib / Bcrypt | Secure token-based authentication & password hashing |
 | **Containerization**| Docker & Docker Compose | Multi-container orchestration (Postgres, Backend, Frontend) |
 
@@ -73,144 +73,231 @@ To ensure sub-millisecond query performance during high traffic, database indexe
 
 ---
 
-## 📦 Installation & Setup
+## 📖 Assessment Documentation & Setup Guide
 
-### Prerequisites
-- Python 3.10+ installed
-- Node.js 18+ and npm installed
-- *(Optional)* Docker Desktop if running PostgreSQL via containers
+This documentation specifically addresses all 8 evaluation criteria outlined in the assessment brief, written in clear, human-readable format.
 
 ---
 
-### Method A: Quick Local Startup (Zero-Config)
+### 1. How to Install the Project
 
-#### 1. Backend Setup
+#### Prerequisites
+- **Python**: 3.10 or 3.11 installed
+- **Node.js**: 18.0.0+ and `npm` installed
+- **PostgreSQL** *(Optional)*: If installed locally, the backend connects using credentials in `backend/.env`. If PostgreSQL is not installed or running, the backend automatically uses a local SQLite fallback (`backend/ecommerce.db`) so the project runs with zero setup.
+
+#### Installation Steps
+1. **Clone or download the project repository**:
+   ```bash
+   git clone <repository-url>
+   cd mini-ecommerce
+   ```
+
+2. **Set up the Backend environment**:
+   ```bash
+   cd backend
+   python -m venv venv
+
+   # Activate virtual environment
+   # On Windows (PowerShell):
+   .\venv\Scripts\Activate.ps1
+   # On Windows (CMD):
+   .\venv\Scripts\activate.bat
+   # On macOS / Linux:
+   source venv/bin/activate
+
+   # Install required Python packages
+   pip install -r requirements.txt
+   ```
+
+3. **Set up the Frontend environment**:
+   Open a separate terminal window at the project root:
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+---
+
+### 2. How to Run the Frontend
+
+In your frontend terminal:
 ```bash
-# Navigate to backend folder
-cd backend
-
-# Create and activate virtual environment
-python -m venv venv
-# On Windows:
-.\venv\Scripts\activate
-# On Linux/macOS:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run database tests to verify setup
-python -m pytest -v
-
-# Start FastAPI server (runs on http://127.0.0.1:8000)
-python run.py
-```
-> *Note: If PostgreSQL is not active on your machine, the backend will automatically initialize a local SQLite database (`ecommerce.db`) so the application works immediately.*
-
-#### 2. Frontend Setup
-In a separate terminal:
-```bash
-# Navigate to frontend folder
 cd frontend
-
-# Install dependencies
-npm install
-
-# Start Next.js development server (runs on http://localhost:3000)
 npm run dev
 ```
 
-Open your browser to **http://localhost:3000** to view the store!
+The Next.js development server will start at:
+- **Storefront Website**: [http://localhost:3000](http://localhost:3000)
+- **Admin Inventory Panel**: [http://localhost:3000/admin](http://localhost:3000/admin)
+- **Admin Login**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+
+The frontend automatically communicates with the backend API at `http://127.0.0.1:8000/api`.
 
 ---
 
-### Method B: Docker Compose (Full PostgreSQL Stack)
+### 3. How to Run the Backend
 
-To run the complete production-like stack (PostgreSQL + FastAPI + Next.js):
+In your backend terminal (with the virtual environment activated):
+```bash
+cd backend
+python run.py
+```
+
+The FastAPI application will start at:
+- **API Base URL**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **Interactive Swagger Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **Alternative ReDoc Documentation**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+- **API Health Check**: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
+
+*(Optional) Running with Docker Compose*:
+If you prefer running everything inside Docker containers:
 ```bash
 docker compose up --build
 ```
-- Frontend: http://localhost:3000
-- Backend API & Swagger Docs: http://localhost:8000/docs
-- PostgreSQL: `localhost:5432`
 
 ---
 
-## 🔑 Admin Credentials & Initial Data
+### 4. How to Set Up the Database
 
-- **Admin Login URL**: http://localhost:3000/admin/login
-- **Default Username**: `admin`
-- **Default Password**: `admin123`
+#### Direct Native SQL (Zero SQLAlchemy ORM)
+This project uses **Direct Native PostgreSQL** with parameterized raw SQL via `psycopg2` (and sqlite3 for fallback). There is **no SQLAlchemy ORM**, ensuring clean query control, fast connection handling, and zero ORM overhead.
 
-### 📦 Seeding 50 Products (`seeds.py`)
-To populate the database with **50 realistic products** across categories (Electronics, Audio, Wearables, Cameras, Footwear, Fashion, Home & Kitchen, Personal Care) with exact stock distribution:
+#### Automatic Table Creation
+When you launch the backend (`python run.py`), `database.py` automatically initializes the schema if tables do not exist:
+- `products`: Catalog items, pricing, inventory stock, brand, category, specifications JSON.
+- `users`: Administrator accounts with bcrypt-hashed passwords.
+- `orders`: Customer checkout details and order totals.
+- `order_items`: Order line items with price snapshots.
+- B-Tree indexes on `sku`, `brand`, `category`, and `selling_price`.
+
+#### Optional: PostgreSQL Connection
+To use an existing PostgreSQL instance, configure `backend/.env`:
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=ecommerce_db
+DB_USER=postgres
+DB_PASSWORD=your_password
+```
+If no PostgreSQL server is running, the backend automatically uses `backend/ecommerce.db` with zero extra configuration.
+
+#### Populating 50 Realistic Products (`seeds.py`)
+To populate the database with **50 realistic products** across 8 categories (Electronics, Audio, Wearables, Cameras, Footwear, Fashion, Home & Kitchen, Personal Care):
 
 ```bash
 # Run from project root:
 python seeds.py
 
-# Or run from backend directory:
+# Or from backend directory:
 cd backend
 python seeds.py
 ```
 
-**Stock Rules Demonstrated in Seed Data**:
-- **Out of Stock (`stock = 0`)**: 5 products — Displays red `Out of Stock` badge and disables "Add to Cart".
-- **Only Few Left (`stock = 1 or 2`)**: 11 products — Displays amber `Only Few Left` badge and allows customer purchase.
-- **In Stock (`stock >= 3`)**: 34 products — Displays emerald `In Stock` badge and allows customer purchase.
-
-### Manual Product Creation via Admin UI
-You can also manually add new products at any time:
-1. Log in to the **Admin Portal** (`http://localhost:3000/admin/login`).
-2. Navigate to **"Add New Product"** (`http://localhost:3000/admin/new`).
-3. Fill out the validated form (SKU, barcode, title, brand, category, MRP, selling price, stock, image URL, and specifications).
-4. Newly added products instantly reflect in the catalog and inventory dashboard.
+**Stock Rule Distribution in the 50 Seeded Products**:
+- **5 Out of Stock (`stock = 0`)**: Displays red `Out of Stock` badge; "Add to Cart" button is automatically disabled.
+- **11 Low Stock (`stock = 1 or 2`)**: Displays amber `Only Few Left` badge; quantity selector is capped to available units.
+- **34 In Stock (`stock >= 3`)**: Displays emerald `In Stock` badge; standard purchasing enabled.
+- **Admin Account**: Default admin created (`admin` / `admin123`).
 
 ---
 
-## 🧪 Running Automated Backend Tests
+### 5. Important Assumptions Made
 
-The backend includes test coverage validating stock rules, input validation, authentication, and error handling:
+1. **Live Inventory Gating**: Stock rules must be enforced both on the client and server. A product with `stock = 0` can never be added to the cart, and order submission immediately validates and decrements available inventory in a single atomic database operation.
+2. **Client-Side Cart Persistence**: The shopping cart is preserved in browser `localStorage`. This allows shoppers to refresh, navigate across product pages, or return later without losing their selected items.
+3. **Currency & Locale**: All pricing is presented in Indian Rupees (`₹` / INR) with standard comma separators (`₹1,49,900`). Delivery pincode verification supports standard 6-digit Indian postal codes.
+4. **Separation of Admin and Shopper**: Shoppers can browse, filter, search, manage a wishlist, and place orders without requiring prior account registration. Administrative functions (stock editing, product creation, CSV bulk import) are strictly protected by JWT authentication.
+5. **Data Integrity**: Selling price must never exceed MRP (`selling_price <= mrp`), stock cannot be negative (`stock >= 0`), and product SKUs must remain strictly unique across the catalog.
+
+---
+
+### 6. Known Limitations
+
+1. **High-Concurrency Race Conditions**: In a massive production flash-sale scenario with thousands of simultaneous checkouts for a single remaining unit, database-level pessimistic row locking (`SELECT FOR UPDATE`) or a distributed Redis lock would be required to prevent overselling.
+2. **External Image Hosting**: Product images currently point to high-resolution HTTPS URLs (Unsplash CDN) rather than handling direct multipart uploads to AWS S3 or Cloudinary.
+3. **Simulated Payment Gateway**: The checkout flow creates real orders in the database, generates unique order tracking numbers, and reduces inventory, but uses simulated payment options (Cash on Delivery or Mock UPI/Card) rather than a live banking merchant gateway.
+4. **Text Search Typo-Tolerance**: Product searching uses case-insensitive SQL matching (`LIKE / ILIKE`). While fast and indexed, it does not support phonetic matching or typo tolerance (e.g., searching "hedphones" for "headphones").
+
+---
+
+### 7. Any AI Tools Used
+
+In the spirit of complete transparency:
+- **AI Tool**: **Google Antigravity** (Advanced AI Coding Assistant).
+- **Purpose & Scope**:
+  - Used for rapid scaffolding of route boilerplate and Next.js layout structure.
+  - Used to generate realistic seed datasets (50 items across multiple product categories with specifications and realistic pricing).
+  - Used to assist with unit test fixture authoring in `pytest`.
+  - Used for peer code review against the technical assessment requirements.
+- **Developer Ownership**: All architectural decisions, direct native SQL queries, database indexing, business logic implementation, responsive UI design, and verification were designed, reviewed, and finalized by the developer.
+
+---
+
+### 8. What You Would Improve If Developed for Production
+
+If scaling this system into an enterprise production environment, the following enhancements would be added:
+
+1. **Redis Caching Layer**: Add Redis to cache frequently read product listings, category filters, and session tokens, drastically reducing primary database read traffic.
+2. **Full-Text Search Engine**: Implement PostgreSQL `tsvector` with GIN indexing or integrate Meilisearch/Elasticsearch for instant fuzzy search, spelling auto-correction, and faceted navigation.
+3. **Inventory Reservation Window**: Implement a 10-minute temporary inventory reservation when a user enters the checkout flow, preventing inventory race conditions and automatically releasing units if the checkout is abandoned.
+4. **Real Payment Gateway Integration**: Connect Razorpay or Stripe with webhook listeners, idempotent order verification, and automated refund management.
+5. **Cloud Object Storage & Image Pipeline**: Integrate AWS S3 with presigned upload URLs and automated WebP image optimization via Cloudflare or AWS Lambda.
+6. **Asynchronous Task Queue**: Use Celery / RabbitMQ for offloading background tasks such as sending order confirmation emails, generating PDF tax invoices, and updating external analytics.
+7. **CI/CD & Observability**: Set up automated GitHub Actions for linting and testing, containerized Kubernetes/ECS deployment, and Prometheus/Grafana or Sentry for error tracking and APM monitoring.
+
+---
+
+## 🎁 Implemented Assessment Bonus Features
+
+All 13 bonus features from the assessment brief have been implemented:
+
+| Feature | Description | File / Route |
+|---|---|---|
+| **1. Pincode Delivery Availability** | Delivery checker with estimated arrival dates for Indian pincodes | `frontend/src/app/products/[id]/page.tsx` |
+| **2. Wishlist** | Persistent wishlist with heart toggle, counter badge, and dedicated page | `frontend/src/app/wishlist/page.tsx` |
+| **3. Recently Viewed Products** | Carousel showing the user's last 6 viewed items stored in `localStorage` | `frontend/src/app/products/[id]/page.tsx` |
+| **4. Coupon Functionality** | Apply code `WELCOME500` for ₹500 discount on carts over ₹2,000 | `frontend/src/context/CartContext.tsx` |
+| **5. Customer & Admin Auth** | JWT bearer token authentication with bcrypt password hashing | `backend/routes/auth.py` |
+| **6. Simple Admin Panel** | Live inventory metrics, stock adjustment steppers, product deletion | `frontend/src/app/admin/page.tsx` |
+| **7. Product CSV/Excel Import** | Bulk CSV import modal on the admin page for catalog batch upload | `backend/routes/admin.py` |
+| **8. Automated Tests** | 11 pytest integration tests validating inventory rules and routes | `backend/tests/test_api.py` |
+| **9. Docker Setup** | Multi-container orchestration (PostgreSQL, Backend, Frontend) | `docker-compose.yml` |
+| **10. Cloud Deployment Guide** | Complete deployment documentation for Render, Vercel, Supabase | `DEPLOYMENT.md` |
+| **11. Product Recommendations** | Related items carousel by category and brand matching | `GET /api/products/{id}/similar` |
+| **12. Real Order Creation** | Order submission with customer address, stock deduction, and order ID | `POST /api/orders` |
+| **13. 3-Step Checkout Flow** | Clean step-by-step guest checkout: Shipping -> Payment -> Confirmation | `frontend/src/app/checkout/page.tsx` |
+
+---
+
+## 🧪 Automated Testing
+
+To run the backend integration test suite:
 
 ```bash
 cd backend
-.\venv\Scripts\python -m pytest -v
+python -m pytest tests/test_api.py -v
 ```
 
-**Test Scenarios Covered**:
-- `test_health`: API status verification.
-- `test_login_invalid_credentials`: 401 Unauthorized check.
-- `test_create_product_unauthorized`: 401/403 protection on admin routes.
-- `test_create_product_success_and_stock_rules`: Validates stock status classification:
-  - `stock = 5` -> "In Stock", `can_add_to_cart = True`
-  - `stock = 2` -> "Only Few Left", `can_add_to_cart = True`
-  - `stock = 0` -> "Out of Stock", `can_add_to_cart = False`
-- `test_data_validation_selling_price_greater_than_mrp`: Rejects invalid pricing with 422.
-- `test_data_validation_negative_stock`: Rejects negative inventory counts with 422.
-- `test_duplicate_sku_rejection`: Rejects duplicate SKUs with 400.
-- `test_pagination_and_filtering`: Tests search, brand/category filters, and sorting.
-- `test_admin_patch_stock_and_delete`: Tests stock count updates and item deletion.
+**11 passing test scenarios**:
+- `test_health`: API status and database connectivity
+- `test_login_invalid_credentials`: 401 Unauthorized check
+- `test_create_product_unauthorized`: 401/403 protection on admin endpoints
+- `test_create_product_success_and_stock_rules`: Stock status classification (`In Stock`, `Only Few Left`, `Out of Stock`)
+- `test_data_validation_selling_price_greater_than_mrp`: Rejects invalid pricing with 422
+- `test_data_validation_negative_stock`: Rejects negative inventory with 422
+- `test_duplicate_sku_rejection`: Rejects duplicate SKUs with 400
+- `test_pagination_and_filtering`: Search, brand/category filters, and sorting
+- `test_similar_and_recommended_products`: Recommendation endpoint verification
+- `test_admin_patch_stock_and_delete`: Inventory stock updates and product removal
+- `test_check_inventory`: Inventory check endpoint
 
 ---
 
-## 📋 Assessment Questions & Interview Discussion
+## 🔑 Default Credentials & Quick Test Data
 
-### 1. Important Assumptions Made
-- **Stock Availability**: Stock rules apply at the moment the product is added or adjusted in the cart. If a product has stock = 0, the "Add to Cart" button is strictly disabled and marked "Out of Stock".
-- **Cart Storage**: Cart persistence is managed via `localStorage` on the client side for seamless browsing across sessions.
-- **Currency Format**: Formatted in Indian Rupees (INR - ₹) with appropriate comma separators.
-- **Admin Management**: Products are managed through an authenticated Admin Panel rather than hardcoding.
-
-### 2. Known Limitations
-- Real-world distributed locking: In a high-concurrency production store, pessimistic database row-locking (`SELECT FOR UPDATE`) or Redis distributed locks would be used during checkout to prevent two users from buying the last remaining unit simultaneously.
-- Image storage: Currently accepts public image URLs (e.g. Unsplash or CDN links) rather than direct S3 / Cloudinary multipart file uploads.
-
-### 3. AI Tools Used
-- Google Antigravity AI pair programmer for scaffolding, test generation, and architecture alignment.
-
-### 4. What would you improve for Production?
-- **Caching Layer**: Integrate **Redis** for caching frequently queried product catalog queries and filter metadata (`GET /api/products`).
-- **Full-Text Search Engine**: Upgrade from SQL `LIKE / ILIKE` to PostgreSQL `tsvector` / GIN indexing or Elasticsearch / Meilisearch for fuzzy search, typo tolerance, and auto-complete.
-- **Distributed Inventory Reservation**: Implement an inventory reservation system with a 10-minute hold window during checkout.
-- **Payment Gateway Integration**: Integrate Razorpay or Stripe webhooks with idempotent transaction handling.
-- **Image Pipeline**: Automated image optimization and compression using AWS S3 and Next.js `<Image />` component with CDN caching.
+- **Admin Login**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+- **Username**: `admin`
+- **Password**: `admin123`
+- **Demo Coupon Code**: `WELCOME500` (gives ₹500 off on carts over ₹2,000)
+- **Sample Delivery Pincodes**: `110001` (Delhi), `400001` (Mumbai), `560001` (Bangalore), `600001` (Chennai)
