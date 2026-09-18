@@ -6,7 +6,7 @@ This application was engineered according to the Website Developer Technical Ass
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 ### 1. Product Listing & Discovery (`/`)
 - **Responsive Layout**: Fluid grid design supporting mobile, tablet, and desktop screens.
@@ -51,7 +51,7 @@ This application was engineered according to the Website Developer Technical Ass
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+##  Tech Stack & Architecture
 
 | Layer | Technology | Purpose |
 |---|---|---|
@@ -73,9 +73,6 @@ To ensure sub-millisecond query performance during high traffic, database indexe
 
 ---
 
-## 📖 Assessment Documentation & Setup Guide
-
-This documentation specifically addresses all 8 evaluation criteria outlined in the assessment brief, written in clear, human-readable format.
 
 ---
 
@@ -223,15 +220,8 @@ python seeds.py
 
 ### 7. Any AI Tools Used
 
-In the spirit of complete transparency:
-- **AI Tool**: **Google Antigravity** (Advanced AI Coding Assistant).
-- **Purpose & Scope**:
-  - Used for rapid scaffolding of route boilerplate and Next.js layout structure.
-  - Used to generate realistic seed datasets (50 items across multiple product categories with specifications and realistic pricing).
-  - Used to assist with unit test fixture authoring in `pytest`.
-  - Used for peer code review against the technical assessment requirements.
-- **Developer Ownership**: All architectural decisions, direct native SQL queries, database indexing, business logic implementation, responsive UI design, and verification were designed, reviewed, and finalized by the developer.
-
+ ## chatgpt,
+ ## google gemini
 ---
 
 ### 8. What You Would Improve If Developed for Production
@@ -248,12 +238,12 @@ If scaling this system into an enterprise production environment, the following 
 
 ---
 
-## 🎁 Implemented Assessment Bonus Features
+##  Implemented Features
 
 All 13 bonus features from the assessment brief have been implemented:
 
 | Feature | Description | File / Route |
-|---|---|---|
+## 
 | **1. Pincode Delivery Availability** | Delivery checker with estimated arrival dates for Indian pincodes | `frontend/src/app/products/[id]/page.tsx` |
 | **2. Wishlist** | Persistent wishlist with heart toggle, counter badge, and dedicated page | `frontend/src/app/wishlist/page.tsx` |
 | **3. Recently Viewed Products** | Carousel showing the user's last 6 viewed items stored in `localStorage` | `frontend/src/app/products/[id]/page.tsx` |
@@ -270,7 +260,7 @@ All 13 bonus features from the assessment brief have been implemented:
 
 ---
 
-## 🧪 Automated Testing
+## Automated Testing
 
 To run the backend integration test suite:
 
@@ -294,7 +284,7 @@ python -m pytest tests/test_api.py -v
 
 ---
 
-## 🔑 Default Credentials & Quick Test Data
+##  Default Credentials & Quick Test Data
 
 - **Admin Login**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
 - **Username**: `admin`

@@ -24,3 +24,5 @@ backend/test_ecommerce.db
 # OS
 .DS_Store
 Thumbs.db
+.env
+venv/
